@@ -1,6 +1,5 @@
 package com.agh.weather.app.api.models;
 
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,12 +14,18 @@ public class WeatherManager {
     private String city;
     private String day;
     private Integer temperature;
+    private String icon;
     private String description;
+    private String windSpeed;
+    private String cloudiness;
+    private String pressure;
+    private String humidity;
 
     public WeatherManager(String city) {
         this.city = city;
     }
 
+    //Build a String from the read Json file
     private String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
@@ -30,7 +35,8 @@ public class WeatherManager {
         return sb.toString();
     }
 
-    public JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+    //Reads and returns the JsonObject
+    private JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
         InputStream is = new URL(url).openStream();
         try {
             BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
@@ -42,11 +48,14 @@ public class WeatherManager {
         }
     }
 
+    //method to get the weather of the selected city
     public void getWeather() {
-        JSONObject json;
-        JSONObject jsonSpecificData;
+        int d = 0;
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("EEEE", Locale.ENGLISH);
+        JSONObject json;
+        JSONObject json_specific; //get specific data in jsonobject variable
+
+        SimpleDateFormat df2 = new SimpleDateFormat("EEEE", Locale.ENGLISH); //Entire word/day as output
         Calendar c = Calendar.getInstance();
 
         try {
@@ -55,45 +64,59 @@ public class WeatherManager {
             return;
         }
 
-        jsonSpecificData = json.getJSONObject("main");
-        this.temperature = jsonSpecificData.getInt("temp");
-        c.add(Calendar.DATE, 0);
-        this.day = simpleDateFormat.format(c.getTime());
+        //receives the particular data in the read Json File
+        json_specific = json.getJSONObject("main");
+        this.temperature = json_specific.getInt("temp");
+        this.pressure = json_specific.get("pressure").toString();
+        this.humidity = json_specific.get("humidity").toString();
+        json_specific = json.getJSONObject("wind");
+        this.windSpeed = json_specific.get("speed").toString();
+        json_specific = json.getJSONObject("clouds");
+        this.cloudiness = json_specific.get("all").toString();
 
-        jsonSpecificData = json.getJSONArray("weather").getJSONObject(0);
-        this.description = jsonSpecificData.get("description").toString();
-        System.out.println("temp: " + this.temperature + " day: " + this.day + " desc: " + this.description);
+        c.add(Calendar.DATE, d);
+        this.day = df2.format(c.getTime());
+
+        json_specific = json.getJSONArray("weather").getJSONObject(0);
+        this.description = json_specific.get("description").toString();
+        this.icon = json_specific.get("icon").toString();
     }
 
+
+    //Setters for all the private fields
     public String getCity() {
         return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
     }
 
     public String getDay() {
         return day;
     }
 
-    public void setDay(String day) {
-        this.day = day;
-    }
-
     public Integer getTemperature() {
         return temperature;
     }
 
-    public void setTemperature(Integer temperature) {
-        this.temperature = temperature;
+    public String getIcon() {
+        return icon;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public String getWindSpeed() {
+        return windSpeed;
+    }
+
+    public String getCloudiness() {
+        return cloudiness;
+    }
+
+    public String getPressure() {
+        return pressure;
+    }
+
+    public String getHumidity() {
+        return humidity;
     }
 }

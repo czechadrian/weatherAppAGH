@@ -1,24 +1,33 @@
 package com.agh.weather.app;
 
-import com.agh.weather.app.api.models.WeatherManager;
 import javafx.application.Application;
-import javafx.scene.Group;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class Main extends Application {
 
-
     @Override
-    public void start(Stage stage) {
-        WeatherManager weatherManager = new WeatherManager("Cracow");
-        weatherManager.getWeather();
+    public void start(Stage primaryStage) throws Exception {
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/weather.fxml"));
 
-        Scene scene = new Scene(new Group(), 1250, 650);
-        stage.setTitle("Weather App");
-        stage.setScene(scene);
-        stage.show();
+            primaryStage.setTitle("Weather");
+
+            primaryStage.getIcons().add(new Image("/images/icon.png"));
+            primaryStage.setScene(new Scene(root, 1050, 670));
+            primaryStage.getScene().getStylesheets().addAll(getClass().getResource("/styles/style.css").toExternalForm());
+            primaryStage.show();
+            primaryStage.setResizable(false);
+            primaryStage.sizeToScene();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 
     public static void main(String[] args) {
         launch(args);

@@ -2,6 +2,7 @@ package com.agh.weather.app.controllers;
 
 import com.agh.weather.app.api.models.ImageHandler;
 import com.agh.weather.app.api.models.WeatherManager;
+import com.agh.weather.app.connection.ConnectionClass;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextField;
 import javafx.animation.FadeTransition;
@@ -16,6 +17,10 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -42,15 +47,16 @@ public class Controller implements Initializable {
     public Label pressure;
     public Label humidity;
 
-    //Constructor to set the initial city to Pune
+    //Constructor to set the initial city to Kraków
     public Controller() {
-        this.citySet = "Pune".toUpperCase();
+        this.citySet = "Kraków".toUpperCase();
     }
 
     //Event Handler for each button
     @FXML
     private void handleButtonClicks(javafx.event.ActionEvent ae) {
         String initialCity = city.getText(); //stores the last searched city-name
+
 
         if (ae.getSource() == change) {
             cityName.setText("");
@@ -80,6 +86,7 @@ public class Controller implements Initializable {
 
     //method to set the new entered city
     private void setPressed() {
+
         //if user enters nothing into cityName field
         if (cityName.getText().equals("")) {
             showToast("City Name cannot be blank");
@@ -90,9 +97,15 @@ public class Controller implements Initializable {
                 this.citySet = cityName.getText().trim();
                 cityName.setText((cityName.getText().trim()).toUpperCase());
                 weatherManager = new WeatherManager(citySet);
+
                 showWeather();
+                insertToDatabase();
+                addSuffix();
+
                 bottomSet(false);
                 invis.requestFocus();
+
+
             } catch (Exception e) {
                 city.setText("Error!!");
                 city.setTextFill(Color.TOMATO);
@@ -137,11 +150,20 @@ public class Controller implements Initializable {
     //actual method to call and get the weather and populate the scene
     private void showWeather() {
         weatherManager.getWeather();
-        city.setText(weatherManager.getCity().toUpperCase());
-        temperature.setText(weatherManager.getTemperature().toString() + "°C");
+        city.setText(weatherManager.getCity());
+        temperature.setText(weatherManager.getTemperature().toString());
         day.setText(weatherManager.getDay().toUpperCase());
         desc.setText(weatherManager.getDescription().toUpperCase());
         img.setImage(new Image(ImageHandler.getImage(weatherManager.getIcon())));
+        windSpeed.setText(weatherManager.getWindSpeed());
+        cloudiness.setText(weatherManager.getCloudiness());
+        pressure.setText(weatherManager.getPressure());
+        humidity.setText(weatherManager.getHumidity());
+    }
+
+    private void addSuffix() {
+        city.setText(weatherManager.getCity().toUpperCase());
+        temperature.setText(weatherManager.getTemperature().toString() + "°C");
         windSpeed.setText(weatherManager.getWindSpeed() + " m/s");
         cloudiness.setText(weatherManager.getCloudiness() + "%");
         pressure.setText(weatherManager.getPressure() + " hpa");
@@ -160,6 +182,7 @@ public class Controller implements Initializable {
         //try catch block to see if there is internet and disabling ecery field
         try {
             showWeather();
+            addSuffix();
         } catch (Exception e) {
             city.setText("Error!! - No Internet");
             city.setTextFill(Color.TOMATO);
@@ -175,5 +198,47 @@ public class Controller implements Initializable {
                 setPressed();
             }
         });
+    }
+
+    public void insertToDatabase() {
+        ConnectionClass connectionClass=new ConnectionClass();
+        Connection connection=connectionClass.getConnection();
+
+        try {
+            Statement statement = connection.createStatement();
+
+            String sql = "INSERT INTO WEATHER (date, time, city, temperature, wind, cloudiness, pressure, HUMIDITY) VALUES " +
+                    "( CURRENT_DATE(), CURRENT_TIME(), \"" +
+                    city.getText() + "\", " +
+                    temperature.getText() + ", " +
+                    windSpeed.getText() + ", " +
+                    cloudiness.getText() + ", " +
+                    pressure.getText() + ", " +
+                    humidity.getText() + ")";
+
+            statement.executeUpdate(sql);
+
+            sql = "SELECT * FROM WEATHER";
+            ResultSet resultSet = statement.executeQuery(sql);
+
+            while (resultSet.next()){
+                if ( resultSet.isLast() ) {
+                    System.out.print("Date:" + resultSet.getString(2));
+                    System.out.print(" Time:" + resultSet.getString(3));
+                    System.out.print(" City:" + resultSet.getString(4));
+                    System.out.print(" Temperature:" + resultSet.getString(5) + "°C");
+                    System.out.print(" Wind Speed:" + resultSet.getString(6) + "m/s");
+                    System.out.print(" Cloudiness:" + resultSet.getString(7) + "%");
+                    System.out.print(" Pressure:" + resultSet.getString(8) + "hpa");
+                    System.out.print(" Humidity:" + resultSet.getString(9) + "%");
+                    System.out.println();
+                }
+            }
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 }

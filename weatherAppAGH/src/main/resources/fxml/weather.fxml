@@ -26,7 +26,7 @@
       </Pane>
       <Pane fx:id="pane1" layoutX="5.0" layoutY="7.0" prefHeight="554.0" prefWidth="1041.0">
          <children>
-            <Label fx:id="city" alignment="CENTER" layoutX="254.0" layoutY="14.0" prefHeight="58.0" prefWidth="533.0" text="CITY NAME" textFill="#78ffc4">
+            <Label fx:id="city" alignment="CENTER" layoutX="254.0" layoutY="14.0" prefHeight="58.0" prefWidth="580.0" text="CITY NAME" textFill="#78ffc4">
                <font>
                   <Font name="System Bold" size="40.0" />
                </font>

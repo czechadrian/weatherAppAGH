@@ -1,5 +1,6 @@
 package com.agh.weather.app.controllers;
 
+import com.agh.weather.app.api.models.BackgroundHandler;
 import com.agh.weather.app.api.models.ImageHandler;
 import com.agh.weather.app.api.models.WeatherManager;
 import com.agh.weather.app.connection.ConnectionClass;
@@ -29,6 +30,7 @@ public class Controller implements Initializable {
 
     @FXML
     public ImageView img;
+    public ImageView background;
     @FXML
     public JFXButton change;
     public JFXButton set;
@@ -154,6 +156,7 @@ public class Controller implements Initializable {
         temperature.setText(weatherManager.getTemperature().toString());
         day.setText(weatherManager.getDay().toUpperCase());
         desc.setText(weatherManager.getDescription().toUpperCase());
+        background.setImage(new Image(BackgroundHandler.getImage(weatherManager.getIcon())));
         img.setImage(new Image(ImageHandler.getImage(weatherManager.getIcon())));
         windSpeed.setText(weatherManager.getWindSpeed());
         cloudiness.setText(weatherManager.getCloudiness());
